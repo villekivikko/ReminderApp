@@ -9,7 +9,7 @@ import androidx.room.Transaction
 interface UserDao {
     @Transaction
     @Insert
-    fun insertUser(userInfo: UserInfo): Long
+    fun insertUser(userInfo: UserInfo)
 
     @Query("DELETE FROM userInfo WHERE uid = :id")
     fun delete(id: Int)

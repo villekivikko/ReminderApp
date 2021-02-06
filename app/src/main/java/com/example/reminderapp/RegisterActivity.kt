@@ -10,8 +10,7 @@ import android.widget.Toast
 import androidx.room.Room
 import androidx.room.Room.databaseBuilder
 import com.example.reminderapp.databinding.ActivityRegisterBinding
-import com.example.reminderapp.db.AppDatabase
-import com.example.reminderapp.db.UserInfo
+import com.example.reminderapp.db.*
 
 class RegisterActivity : AppCompatActivity() {
     private lateinit var registerBtn: Button
@@ -24,6 +23,13 @@ class RegisterActivity : AppCompatActivity() {
 
         registerBtn = binding.btnRegister
         registerBtn.setOnClickListener {
+            if (binding.txtUsername.text.isEmpty()) {
+                Toast.makeText(applicationContext,
+                        "Input an username please",
+                        Toast.LENGTH_SHORT
+                ).show()
+                return@setOnClickListener
+            }
             if (binding.txtPassword.text.isEmpty()) {
                 Toast.makeText(applicationContext,
                     "Input a password please",
@@ -31,16 +37,10 @@ class RegisterActivity : AppCompatActivity() {
                 ).show()
                 return@setOnClickListener
             }
-            if (binding.txtUsername.text.isEmpty()) {
-                Toast.makeText(applicationContext,
-                    "Input an username please",
-                    Toast.LENGTH_SHORT
-                ).show()
-                return@setOnClickListener
-            }
 
             val userInfo = UserInfo(null,
                 name = binding.txtUsername.text.toString(),
+                email = binding.txtEmail.text.toString(),
                 password = binding.txtPassword.text.toString()
             )
 
@@ -51,10 +51,9 @@ class RegisterActivity : AppCompatActivity() {
                     AppDatabase::class.java,
                     "com.example.reminderapp"
                 ).build()
-                val uid = db.userDao().insertUser(userInfo).toInt()
+                db.userDao().insertUser(userInfo)
                 db.close()
             }
-
 
             startActivity(
                 Intent(applicationContext, LoginActivity::class.java)

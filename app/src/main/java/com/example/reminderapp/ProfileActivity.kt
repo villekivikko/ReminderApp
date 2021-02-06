@@ -47,7 +47,8 @@ class ProfileActivity : AppCompatActivity() {
             db.close()
 
             runOnUiThread {
-                binding.textReminder.text = thisUser.first().name
+                binding.textUsername.text = thisUser.first().name
+                binding.textEmail.text = thisUser.first().email
             }
         }
     }
