@@ -4,7 +4,9 @@ import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import com.example.reminderapp.databinding.ActivityAddBinding
-import com.example.reminderapp.databinding.ActivityMainBinding
+import com.google.firebase.database.ktx.database
+import com.google.firebase.ktx.Firebase
+import com.example.reminderapp.db.ReminderInfo
 
 class AddActivity : AppCompatActivity() {
     private lateinit var binding: ActivityAddBinding
@@ -30,5 +32,17 @@ class AddActivity : AppCompatActivity() {
             }
             true
         }
+
+        //Add reminder to Firebase database
+        val reminder = ReminderInfo(null,"Test","64", "64",
+            "4:44", "now", "User", false)
+        val database = Firebase.database(getString(R.string.firebase_db_url))
+        val reference = database.getReference("User")
+        reference.push().setValue(reminder)
+
+
+
+
+
     }
 }

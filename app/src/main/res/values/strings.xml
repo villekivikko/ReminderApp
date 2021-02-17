@@ -3,4 +3,5 @@
     <string name="sharedPreference">"com.example.reminderapp"</string>
     <string name="userName">"user"</string>
     <string name="password">"password"</string>
+    <string name="firebase_db_url">https://reminderapp-37bb2-default-rtdb.firebaseio.com/</string>
 </resources>

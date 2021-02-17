@@ -18,10 +18,11 @@ class ReminderAdaptor(context: Context, private  val list:List<ReminderInfo>): B
         val rowBinding = ReminderItemBinding.inflate(inflater, container, false)
 
         //set reminder info values to the list item
-        rowBinding.txtName.text=list[position].name
-        rowBinding.txtDate.text=list[position].date
-        rowBinding.txtTime.text=list[position].time
-        rowBinding.txtLocation.text=list[position].location
+        rowBinding.txtMessage.text=list[position].message
+        rowBinding.txtReminderTime.text=list[position].reminder_time
+        rowBinding.txtCreationTime.text=list[position].creation_time
+        rowBinding.txtLocationX.text=list[position].location_x
+        rowBinding.txtLocationY.text=list[position].location_y
         return  rowBinding.root
     }
     override fun getItem(position: Int): Any {

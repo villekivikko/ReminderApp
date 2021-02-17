@@ -41,23 +41,16 @@ class MainActivity : AppCompatActivity() {
         }
 
         //Array of items to be displayed
-        val dummy1 = ReminderInfo(
-            null,
-            name = "TestName1",
-            location = "TestLocation1",
-            date = "1.1.2021",
-            time = "4:44"
-        )
+        val dummy1 = ReminderInfo(null,"Test","64", "64",
+            "4:44", "now", "User", false)
 
-        val dummy2 = ReminderInfo(
-            null,
-            name = "TestName2",
-            location = "TestLocation2",
-            date = "2.1.2021",
-            time = "4:45"
-        )
+        val dummy2 = ReminderInfo(null,"Test1","64", "64",
+            "4:45", "now", "User", false)
+
+
 
         val values = arrayListOf(dummy1, dummy2)
+
 
         //Listview
         listView = binding.reminderListView

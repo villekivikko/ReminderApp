@@ -5,30 +5,38 @@
     android:layout_height="match_parent">
 
     <TextView
-        android:id="@+id/txtName"
+        android:id="@+id/txtMessage"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_weight="1"
-        android:text="Name"
+        android:text="Message"
         android:textStyle="bold" />
 
     <TextView
-        android:id="@+id/txtDate"
+        android:id="@+id/txtReminderTime"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_weight="1"
-        android:text="Date" />
+        android:text="ReminderTime" />
 
     <TextView
-        android:id="@+id/txtTime"
+        android:id="@+id/txtCreationTime"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_weight="1"
-        android:text="HH:MM"
+        android:text="CreationTime"
         android:textStyle="bold" />
 
     <TextView
-        android:id="@+id/txtLocation"
+        android:id="@+id/txtLocationX"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:text="Location"
+        android:textStyle="bold" />
+
+    <TextView
+        android:id="@+id/txtLocationY"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_weight="1"
