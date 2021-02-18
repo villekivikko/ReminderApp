@@ -2,6 +2,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example.reminderapp">
 
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
@@ -9,7 +11,13 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.ReminderApp">
-        <activity android:name=".Tutorial3Activity"></activity>
+        <activity android:name=".MapActivity" />
+
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="AIzaSyBdxaNXa_gf5TJef0a6nxSGceEPVjp3Uy4" />
+
+        <activity android:name=".Tutorial3Activity" />
         <activity android:name=".Tutorial2Activity" />
         <activity android:name=".TutorialActivity" />
         <activity android:name=".RegisterActivity" />
