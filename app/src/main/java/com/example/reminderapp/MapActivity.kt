@@ -147,14 +147,6 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
             )
 
             showPopUp(latlng)
-            val database = Firebase.database
-            val reference = database.getReference("reminders")
-            val key = reference.push().key
-            if (key != null) {
-                val reminder = Reminder(key, latlng.latitude, latlng.longitude)
-                reference.child(key).setValue(reminder)
-            }
-            createGeoFence(latlng, key!!, geofencingClient)
         }
     }
 

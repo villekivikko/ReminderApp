@@ -68,7 +68,11 @@ class AddActivity : AppCompatActivity() {
                         "now", "User", false)
                 val database = Firebase.database(getString(R.string.firebase_db_url))
                 val reference = database.getReference("User")
-                reference.push().setValue(reminder)
+                var key = reference.push().key
+                if (key != null) {
+                    reference.child(key).setValue(reminder)
+                }
+
             }
             else {
                 Toast.makeText(
@@ -80,4 +84,6 @@ class AddActivity : AppCompatActivity() {
             }
         }
     }
+
+
 }
