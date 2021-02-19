@@ -21,8 +21,8 @@ class ReminderAdaptor(context: Context, private  val list:List<ReminderInfo>): B
         rowBinding.txtMessage.text=list[position].message
         rowBinding.txtReminderTime.text=list[position].reminder_time
         rowBinding.txtCreationTime.text=list[position].creation_time
-        rowBinding.txtLocationX.text=list[position].location_x
-        rowBinding.txtLocationY.text=list[position].location_y
+        //rowBinding.txtLocationX.text=list[position].location_x
+        //rowBinding.txtLocationY.text=list[position].location_y
         return  rowBinding.root
     }
     override fun getItem(position: Int): Any {
