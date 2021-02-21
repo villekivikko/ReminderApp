@@ -8,7 +8,6 @@ import androidx.room.Room.databaseBuilder
 import com.example.reminderapp.databinding.ActivityTutorial2Binding
 import com.example.reminderapp.databinding.ReminderItemBinding
 import com.example.reminderapp.db.AppDatabase
-import com.example.reminderapp.db.ReminderInfo
 
 
 class Tutorial2Activity : AppCompatActivity() {
@@ -34,10 +33,10 @@ class Tutorial2Activity : AppCompatActivity() {
         }
 
         //Array of items to be displayed
-        val dummy1 = ReminderInfo(null,"Test",0.0, 0.0,
+        val dummy1 = ReminderInfo("","Test",0.0, 0.0,
             "4:44", "now", "User", false)
 
-        val dummy2 = ReminderInfo(null,"Test1",0.0, 0.0,
+        val dummy2 = ReminderInfo("","Test1",0.0, 0.0,
             "4:45", "now", "User", false)
 
         val values = arrayListOf(dummy1, dummy2)

@@ -2,9 +2,9 @@ package com.example.reminderapp.db
 
 import androidx.room.Database
 import androidx.room.RoomDatabase
+import com.example.reminderapp.ReminderInfo
 
-@Database(entities = [ReminderInfo::class, UserInfo::class], version = 3)
+@Database(entities = [UserInfo::class], version = 3)
 abstract class AppDatabase:RoomDatabase() {
-   abstract fun reminderDao():ReminderDao
    abstract fun userDao():UserDao
 }

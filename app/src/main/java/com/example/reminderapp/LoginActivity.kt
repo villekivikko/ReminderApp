@@ -1,17 +1,11 @@
 package com.example.reminderapp
 
 import android.content.Intent
-import android.os.AsyncTask
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.util.Log
 import android.widget.Button
 import android.widget.Toast
-import androidx.room.Room
 import com.example.reminderapp.databinding.ActivityLoginBinding
-import com.example.reminderapp.db.AppDatabase
-import com.example.reminderapp.db.ReminderInfo
-import com.example.reminderapp.db.ReminderDao
 import com.example.reminderapp.db.UserInfo
 
 
