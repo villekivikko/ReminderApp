@@ -94,6 +94,19 @@ class EditLocationActivity : AppCompatActivity(), OnMapReadyCallback {
                         val latLng = LatLng(intent.getDoubleExtra("latitude", 0.0),
                                 intent.getDoubleExtra("longitude", 0.0))
                         moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, CAMERA_ZOOM_LEVEL))
+                        map.addMarker(
+                                MarkerOptions()
+                                        .position(LatLng(intent.getDoubleExtra("latitude", 0.0),
+                                                intent.getDoubleExtra("longitude", 0.0)))
+                        )
+                        map.addCircle(
+                                CircleOptions()
+                                        .center(LatLng(intent.getDoubleExtra("latitude", 0.0),
+                                                intent.getDoubleExtra("longitude", 0.0)))
+                                        .strokeColor(Color.argb(50, 70, 70, 70))
+                                        .fillColor(Color.argb(70, 150, 150, 150))
+                                        .radius(GEOFENCE_RADIUS.toDouble())
+                        )
                     }
                 } else {
                     with(map) {

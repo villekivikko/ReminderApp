@@ -1,18 +1,25 @@
 package com.example.reminderapp
 
+import android.app.Activity
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.speech.RecognizerIntent
 import android.widget.Button
+import android.widget.ImageButton
 import android.widget.Toast
 import com.example.reminderapp.databinding.ActivityAddBinding
 import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
+import java.util.*
+
+const val REQUEST_CODE_SPEECH = 100
 
 class AddActivity : AppCompatActivity() {
     private lateinit var binding: ActivityAddBinding
     private lateinit var locationBtn: Button
     private lateinit var addBtn: Button
+    private lateinit var voiceBtn: ImageButton
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityAddBinding.inflate(layoutInflater)
@@ -40,6 +47,22 @@ class AddActivity : AppCompatActivity() {
         locationBtn = binding.btnLocation
         locationBtn.setOnClickListener {
             startActivity(Intent(applicationContext, MapActivity::class.java))
+        }
+
+        //Initialize voice button and setOnClickListener
+        voiceBtn = binding.btnVoice
+        voiceBtn.setOnClickListener {
+            val voiceIntent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH)
+            voiceIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL,
+                    RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
+            voiceIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, Locale.getDefault())
+            voiceIntent.putExtra(RecognizerIntent.EXTRA_PROMPT, "Speak something...")
+            try{
+                startActivityForResult(voiceIntent, REQUEST_CODE_SPEECH)
+            }catch(e: Exception){
+                Toast.makeText(this, e.message, Toast.LENGTH_SHORT)
+                        .show()
+            }
         }
 
         //Get latitude and longitude
@@ -80,5 +103,16 @@ class AddActivity : AppCompatActivity() {
         }
     }
 
-
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        when(requestCode){
+            REQUEST_CODE_SPEECH ->{
+                if(resultCode== Activity.RESULT_OK && data != null){
+                    // get the text
+                    val result = data.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS)
+                    binding.textNameEdit.setText(result!![0])
+                }
+            }
+        }
+    }
 }
