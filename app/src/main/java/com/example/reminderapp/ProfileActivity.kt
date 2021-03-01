@@ -1,16 +1,12 @@
 package com.example.reminderapp
 
 import android.content.Intent
-import android.os.AsyncTask
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
-import androidx.room.Room
 import com.example.reminderapp.databinding.ActivityProfileBinding
-import com.example.reminderapp.db.AppDatabase
 
 class ProfileActivity : AppCompatActivity() {
     private lateinit var binding: ActivityProfileBinding
-    //private lateinit var user: UserInfo
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -35,21 +31,6 @@ class ProfileActivity : AppCompatActivity() {
                 }
             }
             true
-        }
-        AsyncTask.execute {
-            val db = Room.databaseBuilder(
-                applicationContext,
-                AppDatabase::class.java,
-                "com.example.reminderapp"
-            ).build()
-            val user = db.userDao()
-            val thisUser = user.getUserInfo()
-            db.close()
-
-            runOnUiThread {
-                binding.textUsername.text = thisUser.first().name
-                binding.textEmail.text = thisUser.first().email
-            }
         }
     }
 }

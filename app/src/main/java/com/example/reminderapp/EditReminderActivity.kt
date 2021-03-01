@@ -52,19 +52,15 @@ class EditReminderActivity : AppCompatActivity() {
         var location_y = intent.getDoubleExtra("longitude", 0.0)
         var latitude = intent.getDoubleExtra("latitudeNew", 0.0)
         var longitude = intent.getDoubleExtra("longitudeNew", 0.0)
+        var time = intent.getStringExtra("time")
         if(latitude!=0.0){
             location_x = latitude
             location_y = longitude
         }
-        var time = intent.getStringExtra("time")
-        var timeSplit = time?.split("/")?.toTypedArray()
 
         runOnUiThread {
             binding.textNameEdit.hint = message
-            if(!timeSplit.isNullOrEmpty()) {
-                binding.textDateEdit.hint = timeSplit[0]
-                binding.textTimeEdit.hint = timeSplit[1]
-            }
+            binding.textDateEdit.hint = time
         }
 
         //Initialize Location button and setOnClickListener
@@ -102,13 +98,9 @@ class EditReminderActivity : AppCompatActivity() {
                 message = binding.textNameEdit.text.toString()
             }
             if (binding.textDateEdit.text.toString() != "") {
-                time = binding.textDateEdit.text.toString() + "/" + binding.textTimeEdit.hint.toString()
-            } else if (binding.textTimeEdit.text.toString() != "") {
-                time = binding.textDateEdit.hint.toString() + "/" + binding.textTimeEdit.text.toString()
+                time = binding.textDateEdit.hint.toString()
             }
-            if (binding.textTimeEdit.text.toString() != "" && binding.textDateEdit.text.toString() != "") {
-                time = binding.textDateEdit.text.toString() + "/" + binding.textTimeEdit.text.toString()
-            }
+            // TODO: IMPLEMENT DATEPICKER AND CHECK CHANGES
             if(latitude!=0.0){
                 location_x = latitude
                 location_y = longitude

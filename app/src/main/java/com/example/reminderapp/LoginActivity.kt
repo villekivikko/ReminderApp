@@ -6,7 +6,6 @@ import android.os.Bundle
 import android.widget.Button
 import android.widget.Toast
 import com.example.reminderapp.databinding.ActivityLoginBinding
-import com.example.reminderapp.db.UserInfo
 
 
 class LoginActivity : AppCompatActivity() {
@@ -14,7 +13,6 @@ class LoginActivity : AppCompatActivity() {
     private lateinit var registerBtn: Button
     private lateinit var tutorialBtn: Button
     private lateinit var binding: ActivityLoginBinding
-    private lateinit var thisUser: List<UserInfo>
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityLoginBinding.inflate(layoutInflater)

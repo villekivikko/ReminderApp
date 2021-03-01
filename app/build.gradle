@@ -43,7 +43,7 @@ dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
     implementation 'com.google.android.gms:play-services-maps:17.0.0'
     implementation 'com.google.android.gms:play-services-location:17.1.0'
-    def room_version="2.2.6"
+    def work_version="2.5.0"
 
 
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.1.0"
@@ -52,14 +52,12 @@ dependencies {
     implementation 'com.google.android.material:material:1.2.1'
     implementation 'androidx.constraintlayout:constraintlayout:2.0.4'
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
-    implementation 'androidx.room:room-runtime:2.2.6'
     testImplementation 'junit:junit:4.+'
     androidTestImplementation 'androidx.test.ext:junit:1.1.2'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.3.0'
 
     implementation 'com.google.android.material:material:1.1.0'
-    annotationProcessor 'androidx.room:room-compiler:2.2.6'
-    kapt "androidx.room:room-compiler:$room_version"
+    implementation "androidx.work:work-runtime-ktx:$work_version"
 
     //Firebase
     implementation platform('com.google.firebase:firebase-bom:26.5.0')

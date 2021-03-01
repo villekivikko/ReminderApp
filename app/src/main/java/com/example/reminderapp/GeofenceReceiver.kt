@@ -35,9 +35,9 @@ class GeofenceReceiver: BroadcastReceiver() {
                     override fun onDataChange(snapshot: DataSnapshot) {
                         val reminder = snapshot.getValue<Reminder>()
                         if (reminder != null){
-                            MapActivity.showNotification(
+                            MainActivity.showNotification(
                                 context.applicationContext,
-                                message
+                                message, key
                             )
 
                         }

@@ -4,10 +4,8 @@ import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.ListView
-import androidx.room.Room.databaseBuilder
 import com.example.reminderapp.databinding.ActivityTutorial2Binding
 import com.example.reminderapp.databinding.ReminderItemBinding
-import com.example.reminderapp.db.AppDatabase
 
 
 class Tutorial2Activity : AppCompatActivity() {
@@ -43,13 +41,6 @@ class Tutorial2Activity : AppCompatActivity() {
 
         //Listview
         listView = binding.reminderListView
-
-        val db = databaseBuilder(
-            applicationContext,
-            AppDatabase::class.java,
-            getString(R.string.sharedPreference)
-        )
-            .build()
 
         val adaptor = ReminderAdaptor(applicationContext, values)
         listView.adapter = adaptor

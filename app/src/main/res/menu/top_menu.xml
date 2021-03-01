@@ -6,8 +6,9 @@
         android:title=" "/>
 
     <item
-        android:icon="@drawable/ic_empty"
-        android:title=" "/>
+        android:id="@+id/ic_show"
+        android:icon="@drawable/ic_baseline_smart_button_24"
+        android:title="Show/hide all"/>
 
     <item
         android:id="@+id/ic_logout"
