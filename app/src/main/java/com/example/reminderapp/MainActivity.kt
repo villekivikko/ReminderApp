@@ -13,7 +13,6 @@ import androidx.work.Data
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import com.example.reminderapp.databinding.ActivityMainBinding
-import com.example.reminderapp.databinding.ReminderItemBinding
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.ValueEventListener
@@ -26,7 +25,6 @@ import kotlin.random.Random
 class MainActivity : AppCompatActivity() {
     private lateinit var listView: ListView
     private lateinit var binding: ActivityMainBinding
-    private lateinit var reminderItemBinding: ReminderItemBinding
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
@@ -34,19 +32,15 @@ class MainActivity : AppCompatActivity() {
         var show = false
         setContentView(view)
 
-
         //Set top bar item click listener
         binding.topNavigation.setOnNavigationItemSelectedListener {
             when (it.itemId) {
                 R.id.ic_show -> {
-
                     if(!show) {
                         show = true
-                        it.isChecked = true
                     }
                     else if (show){
                         show = false
-                        it.isChecked = false
                     }
                     retrieveFirebase(show)
                 }
@@ -61,24 +55,19 @@ class MainActivity : AppCompatActivity() {
         binding.bottomNavigation.setOnNavigationItemSelectedListener {
             when (it.itemId) {
                 R.id.ic_add -> {
-                    startActivity(
-                        Intent(applicationContext, AddActivity::class.java)
-                    )
+                    startActivity(Intent(applicationContext, AddActivity::class.java))
                     finish()
                 }
                 R.id.ic_profile -> {
-                    startActivity(
-                        Intent(applicationContext, ProfileActivity::class.java)
-                    )
+                    startActivity(Intent(applicationContext, ProfileActivity::class.java))
                     finish()
                 }
             }
             true
         }
-
         retrieveFirebase(show)
 
-        listView.setOnItemClickListener{parent, view, position, id ->
+        listView.setOnItemClickListener{ _, _, position, _ ->
             val element :ReminderInfo= listView.getItemAtPosition(position) as ReminderInfo
             val intent = Intent(this, EditReminderActivity::class.java)
             intent.putExtra("key", element.uid)
@@ -88,9 +77,6 @@ class MainActivity : AppCompatActivity() {
             intent.putExtra("time", element.reminder_time)
             startActivity(intent)
         }
-
-
-
     }
 
     private fun retrieveFirebase(show: Boolean){
@@ -108,7 +94,7 @@ class MainActivity : AppCompatActivity() {
                         ReminderInfo::class.java) }
 
                     if(!show) {
-                        if (reminder?.message != null && reminder?.reminder_seen) {
+                        if (reminder?.message != null && reminder.reminder_seen) {
                             values.add(reminder)
                             adaptor.notifyDataSetChanged()
                         } else {
@@ -124,9 +110,7 @@ class MainActivity : AppCompatActivity() {
                         }
                     }
                 }
-
             }
-
 
             override fun onCancelled(error: DatabaseError) {
                 println("Reminder:onCancelled: ${error.details}")
@@ -179,31 +163,22 @@ class MainActivity : AppCompatActivity() {
                             ReminderInfo::class.java) }
 
                         if (reminder?.uid == key) {
-                            if (reminder != null) {
-                                println(reminder)
-                                //Update firebase
-                                reminder.reminder_seen = true
+                            println(reminder)
+                            //Update firebase
+                            reminder.reminder_seen = true
 
-                                val database = Firebase.database("https://reminderapp-37bb2-default-rtdb.firebaseio.com")
-                                val reference = database.getReference("User")
-                                if (key != null) {
-                                    reference.child(key).setValue(reminder)
-                                }
-                            }
+                            val database = Firebase.database("https://reminderapp-37bb2-default-rtdb.firebaseio.com")
+                            val reference = database.getReference("User")
+                            reference.child(key).setValue(reminder)
                         }
                     }
-
                 }
-
 
                 override fun onCancelled(error: DatabaseError) {
                     println("Reminder:onCancelled: ${error.details}")
                 }
             }
             firebase.reference.addValueEventListener(reminderListener)
-
-
-            println("******************************* " + key + " ***********************")
         }
 
         fun setReminderWithWorkManager(
@@ -226,9 +201,7 @@ class MainActivity : AppCompatActivity() {
                     .setInputData(reminderParameters)
                     .setInitialDelay(minutesFromNow, TimeUnit.MILLISECONDS)
                     .build()
-
             WorkManager.getInstance(context).enqueue(reminderRequest)
         }
-
     }
 }

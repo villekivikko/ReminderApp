@@ -2,23 +2,17 @@ package com.example.reminderapp
 
 import android.Manifest
 import android.app.AlertDialog
-import android.app.NotificationChannel
-import android.app.NotificationManager
-import android.app.PendingIntent
-import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
-import android.preference.PreferenceManager
 import android.view.LayoutInflater
 import android.view.View
 import android.widget.Button
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
-import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
 import com.google.android.gms.location.*
 import com.google.android.gms.maps.CameraUpdateFactory
@@ -28,9 +22,6 @@ import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.CircleOptions
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
-import com.google.firebase.database.ktx.database
-import com.google.firebase.ktx.Firebase
-import kotlin.random.Random
 
 
 const val LOCATION_REQUEST_CODE = 123
@@ -48,8 +39,6 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
     private lateinit var map: GoogleMap
     private lateinit var alertDialog: AlertDialog
     private lateinit var fusedLocationClient: FusedLocationProviderClient
-    private lateinit var geofencingClient: GeofencingClient
-
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -58,9 +47,7 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
         val mapFragment = supportFragmentManager
                 .findFragmentById(R.id.mapId) as SupportMapFragment
         mapFragment.getMapAsync(this)
-
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
-        geofencingClient = LocationServices.getGeofencingClient(this)
     }
 
 
@@ -76,15 +63,13 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                 permissions.add(Manifest.permission.ACCESS_BACKGROUND_LOCATION)
             }
-            ActivityCompat.requestPermissions(
-                    this,
+            ActivityCompat.requestPermissions(this,
                     permissions.toTypedArray(),
                     LOCATION_REQUEST_CODE
             )
         } else {
 
-            if (ActivityCompat.checkSelfPermission(
-                            this,
+            if (ActivityCompat.checkSelfPermission(this,
                             Manifest.permission.ACCESS_FINE_LOCATION
                     ) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
                             this,
@@ -114,7 +99,6 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
                 }
             }
         }
-
         onLongClick(map)
         setPoiClick(map)
     }
@@ -126,8 +110,6 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
                             .position(poi.latLng)
                             .title(poi.name)
             ).showInfoWindow()
-
-            //scheduleJob()
         }
     }
 
@@ -145,52 +127,10 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
                             .fillColor(Color.argb(70, 150, 150, 150))
                             .radius(GEOFENCE_RADIUS.toDouble())
             )
-
             showPopUp(latlng)
         }
     }
 
-    private fun createGeoFence(location: LatLng, key: String, geofencingClient: GeofencingClient) {
-        val geofence = Geofence.Builder()
-                .setRequestId(GEOFENCE_ID)
-                .setCircularRegion(location.latitude, location.longitude, GEOFENCE_RADIUS.toFloat())
-                .setExpirationDuration(GEOFENCE_EXPIRATION.toLong())
-                .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER or Geofence.GEOFENCE_TRANSITION_DWELL)
-                .setLoiteringDelay(GEOFENCE_DWELL_DELAY)
-                .build()
-
-        val geofenceRequest = GeofencingRequest.Builder()
-                .setInitialTrigger(GeofencingRequest.INITIAL_TRIGGER_ENTER)
-                .addGeofence(geofence)
-                .build()
-
-
-        val intent = Intent(this, GeofenceReceiver::class.java)
-                .putExtra("key", key)
-                .putExtra("message", "Geofence alert - ${location.latitude}, ${location.longitude}")
-
-        val pendingIntent = PendingIntent.getBroadcast(
-                applicationContext, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT
-        )
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            if (ContextCompat.checkSelfPermission(
-                            applicationContext, Manifest.permission.ACCESS_BACKGROUND_LOCATION
-                    ) != PackageManager.PERMISSION_GRANTED) {
-                ActivityCompat.requestPermissions(
-                        this,
-                        arrayOf(
-                                Manifest.permission.ACCESS_BACKGROUND_LOCATION
-                        ),
-                        GEOFENCE_LOCATION_REQUEST_CODE
-                )
-            } else {
-                geofencingClient.addGeofences(geofenceRequest, pendingIntent)
-            }
-        } else {
-            geofencingClient.addGeofences(geofenceRequest, pendingIntent)
-        }
-    }
 
     private fun isLocationPermissionGranted() : Boolean {
         return ContextCompat.checkSelfPermission(
@@ -207,8 +147,7 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
     ) {
         if (requestCode == GEOFENCE_LOCATION_REQUEST_CODE) {
             if (permissions.isNotEmpty() && grantResults[0] != PackageManager.PERMISSION_GRANTED) {
-                Toast.makeText(
-                        this,
+                Toast.makeText(this,
                         "This application needs background location to work on Android 10 and higher",
                         Toast.LENGTH_SHORT
                 ).show()
@@ -220,11 +159,10 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
                             grantResults[0] == PackageManager.PERMISSION_GRANTED ||
                                     grantResults[1] == PackageManager.PERMISSION_GRANTED)
             ) {
-                if (ActivityCompat.checkSelfPermission(
-                                this,
+                if (ActivityCompat.checkSelfPermission(this,
                                 Manifest.permission.ACCESS_FINE_LOCATION
-                        ) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
-                                this,
+                        ) != PackageManager.PERMISSION_GRANTED &&
+                        ActivityCompat.checkSelfPermission(this,
                                 Manifest.permission.ACCESS_COARSE_LOCATION
                         ) != PackageManager.PERMISSION_GRANTED
                 ) {
@@ -233,8 +171,7 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
                 map.isMyLocationEnabled = true
                 onMapReady(map)
             } else {
-                Toast.makeText(
-                        this,
+                Toast.makeText(this,
                         "The app needs location permission to function",
                         Toast.LENGTH_LONG
                 ).show()
@@ -242,8 +179,7 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                 if (grantResults.isNotEmpty() && grantResults[2] != PackageManager.PERMISSION_GRANTED) {
-                    Toast.makeText(
-                            this,
+                    Toast.makeText(this,
                             "This app needs background location to work on Android 10 and higher",
                             Toast.LENGTH_LONG
                     ).show()
@@ -263,21 +199,10 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
 
         val buttonYes: Button = dialogView.findViewById(R.id.btnYes)
         buttonYes.setOnClickListener {
-
             //Transfer info to AddActivity
             val intentAdd = Intent(this, AddActivity::class.java)
                     .putExtra("Latitude", latlng.latitude)
                     .putExtra("Longitude", latlng.longitude)
-            val database = Firebase.database(getString(R.string.firebase_db_url))
-            val reference = database.getReference("LocationFromMap")
-            val key = reference.push().key
-            if (key!= null){
-                val reminder = Reminder(key, latlng.latitude, latlng.longitude)
-                reference.child(key).setValue(reminder)
-            }
-            createGeoFence(latlng, key!!, geofencingClient)
-
-
             alertDialog.cancel()
             startActivity(intentAdd)
             finish()
@@ -287,18 +212,6 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
         dialogBuilder.setView(dialogView)
         alertDialog = dialogBuilder.create()
         alertDialog.show()
-        alertDialog.getWindow()?.setLayout(1200, 700); //Controlling width and height.
-    }
-
-    companion object {
-
-        fun removeGeofences(context: Context, triggeringGeofenceList: MutableList<Geofence>) {
-            val geofenceIdList = mutableListOf<String>()
-            for (entry in triggeringGeofenceList) {
-                geofenceIdList.add(entry.requestId)
-            }
-            LocationServices.getGeofencingClient(context).removeGeofences(geofenceIdList)
-        }
-
+        alertDialog.getWindow()?.setLayout(1200, 700) //Controlling width and height.
     }
 }

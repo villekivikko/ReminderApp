@@ -18,15 +18,11 @@ class ProfileActivity : AppCompatActivity() {
         binding.bottomNavigation.setOnNavigationItemSelectedListener {
             when(it.itemId){
                 R.id.ic_home -> {
-                    startActivity(
-                        Intent(applicationContext, MainActivity::class.java)
-                    )
+                    startActivity(Intent(applicationContext, MainActivity::class.java))
                     finish()
                 }
                 R.id.ic_add -> {
-                    startActivity(
-                        Intent(applicationContext, AddActivity::class.java)
-                    )
+                    startActivity(Intent(applicationContext, AddActivity::class.java))
                     finish()
                 }
             }

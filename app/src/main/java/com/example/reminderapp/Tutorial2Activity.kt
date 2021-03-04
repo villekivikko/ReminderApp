@@ -22,8 +22,7 @@ class Tutorial2Activity : AppCompatActivity() {
         binding.bottomNavigation.setOnNavigationItemSelectedListener {
             when (it.itemId) {
                 R.id.ic_add -> {
-                    startActivity(
-                        Intent(applicationContext, Tutorial3Activity::class.java))
+                    startActivity(Intent(applicationContext, Tutorial3Activity::class.java))
                     finish()
                 }
             }
@@ -32,10 +31,10 @@ class Tutorial2Activity : AppCompatActivity() {
 
         //Array of items to be displayed
         val dummy1 = ReminderInfo("","Test",0.0, 0.0,
-            "4:44", "now", "User", false)
+            "4:44", AddActivity.getCurrentTime(), "User", false)
 
         val dummy2 = ReminderInfo("","Test1",0.0, 0.0,
-            "4:45", "now", "User", false)
+            "4:45", AddActivity.getCurrentTime(), "User", false)
 
         val values = arrayListOf(dummy1, dummy2)
 
@@ -44,7 +43,5 @@ class Tutorial2Activity : AppCompatActivity() {
 
         val adaptor = ReminderAdaptor(applicationContext, values)
         listView.adapter = adaptor
-
     }
-
 }

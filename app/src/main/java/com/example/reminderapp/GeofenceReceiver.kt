@@ -30,24 +30,21 @@ class GeofenceReceiver: BroadcastReceiver() {
 
                 // Retrieve from firebase
                 val firebase = Firebase.database
-                val reference = firebase.getReference("LocationFromMap")
+                val reference = firebase.getReference("User")
                 val reminderListener = object : ValueEventListener {
                     override fun onDataChange(snapshot: DataSnapshot) {
-                        val reminder = snapshot.getValue<Reminder>()
+                        val reminder = snapshot.getValue<ReminderInfo>()
                         if (reminder != null){
-                            MainActivity.showNotification(
-                                context.applicationContext,
-                                message, key
-                            )
-
+                            MainActivity.showNotification(context.applicationContext,
+                                message, key)
                         }
                     }
 
                     override fun onCancelled(error: DatabaseError) {
                         println("Reminder:onCancelled: ${error.details}")
                     }
-
                 }
+
                 val child = reference.child(key)
                 child.addValueEventListener(reminderListener)
             }

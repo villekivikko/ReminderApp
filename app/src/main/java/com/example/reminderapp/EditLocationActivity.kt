@@ -2,23 +2,18 @@ package com.example.reminderapp
 
 import android.Manifest
 import android.app.AlertDialog
-import android.app.NotificationChannel
-import android.app.NotificationManager
 import android.app.PendingIntent
-import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
-import android.preference.PreferenceManager
 import android.view.LayoutInflater
 import android.view.View
 import android.widget.Button
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
-import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
 import com.google.android.gms.location.*
 import com.google.android.gms.maps.CameraUpdateFactory
@@ -28,9 +23,6 @@ import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.CircleOptions
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
-import com.google.firebase.database.ktx.database
-import com.google.firebase.ktx.Firebase
-import kotlin.random.Random
 
 
 private val TAG = EditLocationActivity::class.java.simpleName
@@ -75,11 +67,10 @@ class EditLocationActivity : AppCompatActivity(), OnMapReadyCallback {
             )
         } else {
 
-            if (ActivityCompat.checkSelfPermission(
-                            this,
+            if (ActivityCompat.checkSelfPermission(this,
                             Manifest.permission.ACCESS_FINE_LOCATION
-                    ) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
-                            this,
+                    ) != PackageManager.PERMISSION_GRANTED &&
+                    ActivityCompat.checkSelfPermission(this,
                             Manifest.permission.ACCESS_COARSE_LOCATION
                     ) != PackageManager.PERMISSION_GRANTED
             ) {
@@ -113,9 +104,7 @@ class EditLocationActivity : AppCompatActivity(), OnMapReadyCallback {
                         moveCamera(
                                 CameraUpdateFactory.newLatLngZoom(
                                         LatLng(65.01355297927051, 25.464019811372978),
-                                        CAMERA_ZOOM_LEVEL
-                                )
-                        )
+                                        CAMERA_ZOOM_LEVEL))
                     }
                 }
             }
@@ -132,8 +121,6 @@ class EditLocationActivity : AppCompatActivity(), OnMapReadyCallback {
                             .position(poi.latLng)
                             .title(poi.name)
             ).showInfoWindow()
-
-            //scheduleJob()
         }
     }
 
@@ -156,7 +143,7 @@ class EditLocationActivity : AppCompatActivity(), OnMapReadyCallback {
         }
     }
 
-    private fun createGeoFence(location: LatLng, key: String, geofencingClient: GeofencingClient) {
+    private fun createGeoFence(location: LatLng, key: String, msg: String, geofencingClient: GeofencingClient) {
         val geofence = Geofence.Builder()
                 .setRequestId(GEOFENCE_ID)
                 .setCircularRegion(location.latitude, location.longitude, GEOFENCE_RADIUS.toFloat())
@@ -173,21 +160,18 @@ class EditLocationActivity : AppCompatActivity(), OnMapReadyCallback {
 
         val intent = Intent(this, GeofenceReceiver::class.java)
                 .putExtra("key", key)
-                .putExtra("message", "Geofence alert - ${location.latitude}, ${location.longitude}")
+                .putExtra("message", "Geofence alert - $msg")
 
         val pendingIntent = PendingIntent.getBroadcast(
                 applicationContext, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT
         )
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            if (ContextCompat.checkSelfPermission(
-                            applicationContext, Manifest.permission.ACCESS_BACKGROUND_LOCATION
+            if (ContextCompat.checkSelfPermission(applicationContext,
+                            Manifest.permission.ACCESS_BACKGROUND_LOCATION
                     ) != PackageManager.PERMISSION_GRANTED) {
-                ActivityCompat.requestPermissions(
-                        this,
-                        arrayOf(
-                                Manifest.permission.ACCESS_BACKGROUND_LOCATION
-                        ),
+                ActivityCompat.requestPermissions(this,
+                        arrayOf(Manifest.permission.ACCESS_BACKGROUND_LOCATION),
                         GEOFENCE_LOCATION_REQUEST_CODE
                 )
             } else {
@@ -213,8 +197,7 @@ class EditLocationActivity : AppCompatActivity(), OnMapReadyCallback {
     ) {
         if (requestCode == GEOFENCE_LOCATION_REQUEST_CODE) {
             if (permissions.isNotEmpty() && grantResults[0] != PackageManager.PERMISSION_GRANTED) {
-                Toast.makeText(
-                        this,
+                Toast.makeText(this,
                         "This application needs background location to work on Android 10 and higher",
                         Toast.LENGTH_SHORT
                 ).show()
@@ -226,11 +209,10 @@ class EditLocationActivity : AppCompatActivity(), OnMapReadyCallback {
                             grantResults[0] == PackageManager.PERMISSION_GRANTED ||
                                     grantResults[1] == PackageManager.PERMISSION_GRANTED)
             ) {
-                if (ActivityCompat.checkSelfPermission(
-                                this,
+                if (ActivityCompat.checkSelfPermission(this,
                                 Manifest.permission.ACCESS_FINE_LOCATION
-                        ) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
-                                this,
+                        ) != PackageManager.PERMISSION_GRANTED &&
+                        ActivityCompat.checkSelfPermission(this,
                                 Manifest.permission.ACCESS_COARSE_LOCATION
                         ) != PackageManager.PERMISSION_GRANTED
                 ) {
@@ -239,8 +221,7 @@ class EditLocationActivity : AppCompatActivity(), OnMapReadyCallback {
                 map.isMyLocationEnabled = true
                 onMapReady(map)
             } else {
-                Toast.makeText(
-                        this,
+                Toast.makeText(this,
                         "The app needs location permission to function",
                         Toast.LENGTH_LONG
                 ).show()
@@ -248,8 +229,7 @@ class EditLocationActivity : AppCompatActivity(), OnMapReadyCallback {
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                 if (grantResults.isNotEmpty() && grantResults[2] != PackageManager.PERMISSION_GRANTED) {
-                    Toast.makeText(
-                            this,
+                    Toast.makeText(this,
                             "This app needs background location to work on Android 10 and higher",
                             Toast.LENGTH_LONG
                     ).show()
@@ -277,15 +257,6 @@ class EditLocationActivity : AppCompatActivity(), OnMapReadyCallback {
                     .putExtra("key", intent.getStringExtra("key"))
                     .putExtra("message", intent.getStringExtra("message"))
                     .putExtra("time", intent.getStringExtra("time"))
-            val database = Firebase.database(getString(R.string.firebase_db_url))
-            val reference = database.getReference("LocationFromMap")
-            val key = reference.push().key
-            if (key!= null){
-                val reminder = Reminder(key, latlng.latitude, latlng.longitude)
-                reference.child(key).setValue(reminder)
-            }
-            createGeoFence(latlng, key!!, geofencingClient)
-
             alertDialog.cancel()
             startActivity(intentEdit)
             finish()
@@ -295,76 +266,7 @@ class EditLocationActivity : AppCompatActivity(), OnMapReadyCallback {
         dialogBuilder.setView(dialogView)
         alertDialog = dialogBuilder.create()
         alertDialog.show()
-        alertDialog.getWindow()?.setLayout(1200, 700); //Controlling width and height.
+        alertDialog.getWindow()?.setLayout(1200, 700) //Controlling width and height.
     }
 
-    companion object {
-
-        fun removeGeofences(context: Context, triggeringGeofenceList: MutableList<Geofence>) {
-            val geofenceIdList = mutableListOf<String>()
-            for (entry in triggeringGeofenceList) {
-                geofenceIdList.add(entry.requestId)
-            }
-            LocationServices.getGeofencingClient(context).removeGeofences(geofenceIdList)
-        }
-
-        fun showNotification(context: Context?, message: String) {
-            val CHANNEL_ID = "REMINDER_NOTIFICATION_CHANNEL"
-            var notificationId = 1589
-            notificationId += Random(notificationId).nextInt(1, 30)
-
-            val notificationBuilder = NotificationCompat.Builder(context!!.applicationContext, CHANNEL_ID)
-                    .setSmallIcon(R.drawable.ic_baseline_alarm_24)
-                    .setContentTitle(context.getString(R.string.app_name))
-                    .setContentText(message)
-                    .setStyle(
-                            NotificationCompat.BigTextStyle()
-                                    .bigText(message)
-                    )
-                    .setPriority(NotificationCompat.PRIORITY_DEFAULT)
-
-            val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                val channel = NotificationChannel(
-                        CHANNEL_ID,
-                        context.getString(R.string.app_name),
-                        NotificationManager.IMPORTANCE_DEFAULT
-                ).apply {
-                    description = context.getString(R.string.app_name)
-                }
-                notificationManager.createNotificationChannel(channel)
-            }
-            notificationManager.notify(notificationId, notificationBuilder.build())
-        }
-    }
-/*
-    private fun scheduleJob() {
-        val componentName = ComponentName(this, ReminderJobService::class.java)
-        val info = JobInfo.Builder(321, componentName)
-                .setRequiresCharging(false)
-                .setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY)
-                .setPersisted(true)
-                .setPeriodic(15 * 60 * 1000)
-                .build()
-
-        val scheduler = getSystemService(JOB_SCHEDULER_SERVICE) as JobScheduler
-        val resultCode = scheduler.schedule(info)
-        if (resultCode == JobScheduler.RESULT_SUCCESS) {
-            Log.d(TAG, "Job scheduled")
-        } else {
-            Log.d(TAG, "Job scheduling failed")
-            scheduleJob()
-        }
-    }
-
-    private fun cancelJob() {
-        val scheduler = getSystemService(JOB_SCHEDULER_SERVICE) as JobScheduler
-        scheduler.cancel(321)
-        Log.d(TAG, "Job cancelled")
-    }
-
-
-
- */
 }
