@@ -1,13 +1,18 @@
 package com.example.reminderapp
 
 import android.Manifest
+import android.app.DatePickerDialog
 import android.app.PendingIntent
+import android.app.TimePickerDialog
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.text.InputType
 import android.widget.Button
+import android.widget.DatePicker
+import android.widget.TimePicker
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.example.reminderapp.databinding.ActivityEditReminderBinding
@@ -18,9 +23,13 @@ import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.model.LatLng
 import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
+import java.text.SimpleDateFormat
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 import java.util.*
 
-class EditReminderActivity : AppCompatActivity() {
+class EditReminderActivity : AppCompatActivity() , DatePickerDialog.OnDateSetListener,
+        TimePickerDialog.OnTimeSetListener {
     private lateinit var binding: ActivityEditReminderBinding
     private lateinit var applyBtn: Button
     private lateinit var deleteBtn: Button
@@ -85,6 +94,18 @@ class EditReminderActivity : AppCompatActivity() {
 
         }
 
+        //Initialize date and setOnClickListener
+        binding.textDateEdit.inputType = InputType.TYPE_NULL
+        binding.textDateEdit.isClickable=true
+        binding.textDateEdit.setOnClickListener {
+            reminderCalendar = GregorianCalendar.getInstance()
+            DatePickerDialog(this, this,
+                    reminderCalendar.get(Calendar.YEAR),
+                    reminderCalendar.get(Calendar.MONTH),
+                    reminderCalendar.get(Calendar.DAY_OF_MONTH)
+            ).show()
+        }
+
         //Initialize Delete button and setOnClickListener
         deleteBtn = binding.btnDelete
         deleteBtn.setOnClickListener {
@@ -93,6 +114,8 @@ class EditReminderActivity : AppCompatActivity() {
             val reference = database.getReference("User")
             if(key!=null) {
                 reference.child(key).removeValue()
+                //Delete the WorkManager work
+                MainActivity.cancelReminder(applicationContext, key)
             }
             startActivity(Intent(applicationContext, MainActivity::class.java))
             finish()
@@ -108,11 +131,60 @@ class EditReminderActivity : AppCompatActivity() {
             if (binding.textDateEdit.text.toString() != "") {
                 time = binding.textDateEdit.hint.toString()
             }
-            // TODO: IMPLEMENT DATEPICKER AND CHECK CHANGES
+            else{
+                time = binding.textDateEdit.text.toString()
+            }
             if(latitude!=0.0){
                 location_x = latitude
                 location_y = longitude
             }
+
+            val reminderCalendar = GregorianCalendar.getInstance()
+            val dateFormat = "dd.MM.yyyy HH:mm"
+            // If the reminder has a date and time
+            if(binding.textDateEdit.text.toString() != "") {
+                //This can be done with API version 26
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    val formatter = DateTimeFormatter.ofPattern(dateFormat)
+                    val date = LocalDateTime.parse(binding.textDateEdit.text, formatter)
+
+                    reminderCalendar.set(Calendar.YEAR, date.year)
+                    reminderCalendar.set(Calendar.MONTH, date.monthValue - 1)
+                    reminderCalendar.set(Calendar.DAY_OF_MONTH, date.dayOfMonth)
+                    reminderCalendar.set(Calendar.HOUR_OF_DAY, date.hour)
+                    reminderCalendar.set(Calendar.MINUTE, date.minute)
+                }
+                //With lower apis we have to do it manually
+                else {
+                    if (dateFormat.contains(":")) {
+                        //Split date and time to pieces
+                        val dateParts = binding.textDateEdit.text.split(" ")
+                                .toTypedArray()[0].split(".").toTypedArray()
+                        val timeParts = binding.textDateEdit.text.split(" ")
+                                .toTypedArray()[1].split(":").toTypedArray()
+
+                        reminderCalendar.set(Calendar.YEAR, dateParts[2].toInt())
+                        reminderCalendar.set(Calendar.MONTH, dateParts[1].toInt() - 1)
+                        reminderCalendar.set(Calendar.DAY_OF_MONTH, dateParts[0].toInt())
+                        reminderCalendar.set(Calendar.HOUR_OF_DAY, timeParts[0].toInt())
+                        reminderCalendar.set(Calendar.MINUTE, timeParts[1].toInt())
+
+                    } else {
+                        //no time part
+                        //convert date  string value to Date format using dd.mm.yyyy
+                        // here it is assumed that date is in dd.mm.yyyy
+                        val dateParts = binding.textDateEdit.text.split(".").toTypedArray()
+                        reminderCalendar.set(Calendar.YEAR, dateParts[2].toInt())
+                        reminderCalendar.set(Calendar.MONTH, dateParts[1].toInt() - 1)
+                        reminderCalendar.set(Calendar.DAY_OF_MONTH, dateParts[0].toInt())
+                    }
+                }
+            }
+
+            if(binding.textDateEdit.text.toString() != ""){
+                time = binding.textDateEdit.text.toString()
+            }
+
             val reminder = ReminderInfo(key!!, message!!, location_x, location_y, time!!,
                     AddActivity.getCurrentTime(), "User", false)
             //Update firebase
@@ -120,13 +192,9 @@ class EditReminderActivity : AppCompatActivity() {
             val reference = database.getReference("User")
             reference.child(key).setValue(reminder)
 
-            //TODO:  Delete old WorkManager
-            //Set reminder with WorkManager
-            val reminderCalendar = GregorianCalendar.getInstance()
-            if(binding.textDateEdit.text.toString() != "") {
-                MainActivity.setReminderWithWorkManager(applicationContext, key,
-                        reminderCalendar.timeInMillis, binding.textNameEdit.text.toString())
-            }
+            //Set reminder with WorkManager. This replaces the old one.
+            MainActivity.setReminderWithWorkManager(applicationContext, key,
+                    reminderCalendar.timeInMillis, message!!)
 
             //TODO:  Delete old geofence
             //Set Geofence reminder
@@ -182,5 +250,29 @@ class EditReminderActivity : AppCompatActivity() {
         } else {
             geofencingClient.addGeofences(geofenceRequest, pendingIntent)
         }
+    }
+
+    override fun onDateSet(view: DatePicker?, year: Int, month: Int, dayOfMonth: Int) {
+        reminderCalendar.set(Calendar.YEAR, year)
+        reminderCalendar.set(Calendar.MONTH, month)
+        reminderCalendar.set(Calendar.DAY_OF_MONTH, dayOfMonth)
+        val simpleDateFormat = SimpleDateFormat("dd.MM.yyyy")
+        binding.textDateEdit.setText(simpleDateFormat.format(reminderCalendar.time))
+
+        //Pick Time
+        TimePickerDialog(
+                this,
+                this,
+                reminderCalendar.get(Calendar.HOUR_OF_DAY),
+                reminderCalendar.get(Calendar.MINUTE),
+                true
+        ).show()
+    }
+
+    override fun onTimeSet(view: TimePicker?, selectedhourOfDay: Int, selectedMinute: Int) {
+        reminderCalendar.set(Calendar.HOUR_OF_DAY, selectedhourOfDay)
+        reminderCalendar.set(Calendar.MINUTE, selectedMinute)
+        val simpleDateFormat = SimpleDateFormat("dd.MM.yyyy HH:mm")
+        binding.textDateEdit.setText(simpleDateFormat.format(reminderCalendar.time))
     }
 }

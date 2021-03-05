@@ -12,7 +12,7 @@ import com.google.firebase.ktx.Firebase
 class ReminderReceiver :BroadcastReceiver(){
     override fun onReceive(context: Context?, intent: Intent?) {
         // Retrieve data from intent
-        val key = intent?.getStringExtra("uid")
+        val key = intent?.getStringExtra("key")
         val message = intent?.getStringExtra("message")
 
         MainActivity.showNotification(context!!,message!!, key!!)

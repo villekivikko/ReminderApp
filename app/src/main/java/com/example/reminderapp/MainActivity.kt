@@ -10,6 +10,7 @@ import android.os.Bundle
 import android.widget.ListView
 import androidx.core.app.NotificationCompat
 import androidx.work.Data
+import androidx.work.ExistingWorkPolicy
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import com.example.reminderapp.databinding.ActivityMainBinding
@@ -183,13 +184,13 @@ class MainActivity : AppCompatActivity() {
 
         fun setReminderWithWorkManager(
                 context: Context,
-                uid: String,
+                key: String,
                 timeInMillis: Long,
                 message: String
         ) {
             val reminderParameters = Data.Builder()
                     .putString("message", message)
-                    .putString("uid", uid)
+                    .putString("key", key)
                     .build()
 
             // get minutes from now until reminder
@@ -201,7 +202,13 @@ class MainActivity : AppCompatActivity() {
                     .setInputData(reminderParameters)
                     .setInitialDelay(minutesFromNow, TimeUnit.MILLISECONDS)
                     .build()
-            WorkManager.getInstance(context).enqueue(reminderRequest)
+            println(reminderRequest)
+            WorkManager.getInstance(context).enqueueUniqueWork(key,
+                    ExistingWorkPolicy.REPLACE, reminderRequest)
+        }
+
+        fun cancelReminder(context: Context, key: String){
+            WorkManager.getInstance(context).cancelUniqueWork(key)
         }
     }
 }
