@@ -2,7 +2,6 @@ package com.example.reminderapp
 
 import android.Manifest
 import android.app.AlertDialog
-import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Color
 import android.os.Build
@@ -23,17 +22,7 @@ import com.google.android.gms.maps.model.CircleOptions
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
 
-
-const val LOCATION_REQUEST_CODE = 123
-const val GEOFENCE_LOCATION_REQUEST_CODE = 12345
-const val CAMERA_ZOOM_LEVEL = 13f
-const val GEOFENCE_RADIUS = 400
-const val GEOFENCE_ID = "REMINDER_GEOFENCE_ID"
-const val GEOFENCE_EXPIRATION = 10*24*60*60*1000    //10 days
-const val GEOFENCE_DWELL_DELAY = 10*1000            //10 seconds
-
-
-class MapActivity : AppCompatActivity(), OnMapReadyCallback {
+class VirtualLocationActivity : AppCompatActivity(), OnMapReadyCallback {
 
     private lateinit var map: GoogleMap
     private lateinit var alertDialog: AlertDialog
@@ -116,7 +105,7 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
             map.clear()
             map.addMarker(
                     MarkerOptions().position(latlng)
-                            .title("Reminder location")
+                            .title("Virtual Location. Triggers reminders in this area")
             ).showInfoWindow()
             map.addCircle(
                     CircleOptions()
@@ -128,7 +117,6 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
             showPopUp(latlng)
         }
     }
-
 
     private fun isLocationPermissionGranted() : Boolean {
         return ContextCompat.checkSelfPermission(
@@ -197,13 +185,10 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
 
         val buttonYes: Button = dialogView.findViewById(R.id.btnYes)
         buttonYes.setOnClickListener {
-            //Transfer info to AddActivity
-            val intentAdd = Intent(this, AddActivity::class.java)
-                    .putExtra("Latitude", latlng.latitude)
-                    .putExtra("Longitude", latlng.longitude)
+            //Update virtual location
+            MainActivity.virtualLongitude = latlng.longitude
+            MainActivity.virtualLatitude = latlng.latitude
             alertDialog.cancel()
-            startActivity(intentAdd)
-            finish()
         }
 
         val dialogBuilder: AlertDialog.Builder = AlertDialog.Builder(this)

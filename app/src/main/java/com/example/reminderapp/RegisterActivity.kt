@@ -7,6 +7,8 @@ import android.os.Bundle
 import android.widget.Button
 import android.widget.Toast
 import com.example.reminderapp.databinding.ActivityRegisterBinding
+import com.google.firebase.database.ktx.database
+import com.google.firebase.ktx.Firebase
 
 class RegisterActivity : AppCompatActivity() {
     private lateinit var registerBtn: Button
@@ -34,9 +36,19 @@ class RegisterActivity : AppCompatActivity() {
                 return@setOnClickListener
             }
 
-            startActivity(
-                Intent(applicationContext, LoginActivity::class.java)
-            )
+            if(binding.txtUsername.text.isNotEmpty() && binding.txtPassword.text.isNotEmpty()){
+                val database = Firebase.database(getString(R.string.firebase_db_url))
+                val user = UserInfo(binding.txtUsername.text.toString(),
+                    binding.txtPassword.text.toString())
+                database.reference
+                    .child("UserDatabase")
+                    .child(binding.txtUsername.text.toString()).setValue(user)
+
+                startActivity(Intent(applicationContext, LoginActivity::class.java))
+                finish()
+            }
+
+
         }
     }
 }

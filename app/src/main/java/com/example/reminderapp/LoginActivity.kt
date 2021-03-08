@@ -6,6 +6,11 @@ import android.os.Bundle
 import android.widget.Button
 import android.widget.Toast
 import com.example.reminderapp.databinding.ActivityLoginBinding
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.ValueEventListener
+import com.google.firebase.database.ktx.database
+import com.google.firebase.ktx.Firebase
 
 
 class LoginActivity : AppCompatActivity() {
@@ -26,18 +31,38 @@ class LoginActivity : AppCompatActivity() {
             val username = binding.txtUsername.text.toString()
             val password = binding.txtPassword.text.toString()
 
-            //DUMMY credentials: username=user , password=password
-            if (username == getString(R.string.userName) && password == getString(R.string.password)){
-                startActivity(Intent(applicationContext, MainActivity::class.java))
+            // Retrieve from firebase
+            val firebase = Firebase.database
+            val reminderListener = object : ValueEventListener {
+                override fun onDataChange(snapshot: DataSnapshot) {
+                    for (child in snapshot.child("UserDatabase").children) {
+                        val user = child.key?.let {
+                            snapshot.child("UserDatabase").child(it).getValue(
+                                UserInfo::class.java)}
+                        if (user?.username == username && user.password == password) {
+                            usernameGlobal = username
+                            passwordMatch = 1
+                            startActivity(Intent(applicationContext, MainActivity::class.java))
+                            finish()
+                        }
+                    }
+                    if (passwordMatch!=1) {
+                        Toast.makeText(
+                            applicationContext,
+                            "Invalid login credentials.",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+                }
+
+                override fun onCancelled(error: DatabaseError) {
+                    println("Reminder:onCancelled: ${error.details}")
+                }
             }
-            else {
-                Toast.makeText(
-                    applicationContext,
-                    "Invalid login credentials.",
-                    Toast.LENGTH_SHORT
-                ).show()
-                return@setOnClickListener
-            }
+
+            firebase.reference.addValueEventListener(reminderListener)
+
+            //return@setOnClickListener
 
             //save login status
 
@@ -49,10 +74,18 @@ class LoginActivity : AppCompatActivity() {
         registerBtn = binding.btnRegister
         registerBtn.setOnClickListener {
             startActivity(Intent(applicationContext, RegisterActivity::class.java))
+            finish()
         }
         tutorialBtn = binding.btnTutorial
         tutorialBtn.setOnClickListener {
             startActivity(Intent(applicationContext, TutorialActivity::class.java))
+            finish()
         }
     }
+
+    companion object{
+        var usernameGlobal = ""
+        var passwordMatch = 0
+    }
+
 }

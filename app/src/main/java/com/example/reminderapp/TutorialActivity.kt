@@ -19,6 +19,7 @@ class TutorialActivity : AppCompatActivity() {
         registerBtn.setOnClickListener {
             startActivity(
                     Intent(applicationContext, Tutorial2Activity::class.java))
+            finish()
         }
     }
 }

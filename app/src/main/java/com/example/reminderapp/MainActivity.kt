@@ -36,6 +36,9 @@ class MainActivity : AppCompatActivity() {
         //Set top bar item click listener
         binding.topNavigation.setOnNavigationItemSelectedListener {
             when (it.itemId) {
+                R.id.ic_location -> {
+                startActivity(Intent(applicationContext, VirtualLocationActivity::class.java))
+                }
                 R.id.ic_show -> {
                     if(!show) {
                         show = true
@@ -46,7 +49,10 @@ class MainActivity : AppCompatActivity() {
                     retrieveFirebase(show)
                 }
                 R.id.ic_logout -> {
-                    //TODO
+                    LoginActivity.usernameGlobal = ""
+                    LoginActivity.passwordMatch = 0
+                    startActivity(Intent(applicationContext, LoginActivity::class.java))
+                    finish()
                 }
             }
             true
@@ -77,6 +83,7 @@ class MainActivity : AppCompatActivity() {
             intent.putExtra("longitude", element.location_y)
             intent.putExtra("time", element.reminder_time)
             startActivity(intent)
+            finish()
         }
     }
 
@@ -90,8 +97,8 @@ class MainActivity : AppCompatActivity() {
         val firebase = Firebase.database
         val reminderListener = object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
-                for (child in snapshot.child("User").children) {
-                    val reminder = child.key?.let { snapshot.child("User").child(it).getValue(
+                for (child in snapshot.child(LoginActivity.usernameGlobal).children) {
+                    val reminder = child.key?.let { snapshot.child(LoginActivity.usernameGlobal).child(it).getValue(
                         ReminderInfo::class.java) }
 
                     if(!show) {
@@ -122,8 +129,11 @@ class MainActivity : AppCompatActivity() {
     }
 
     companion object {
+        var virtualLatitude = 0.0
+        var virtualLongitude = 0.0
+        var isLocationOffered = 0
 
-        fun showNotification(context: Context?, message: String, key: String) {
+        fun showNotification(context: Context?, message: String, key: String, location_x: Double, location_y: Double) {
             val CHANNEL_ID = "REMINDER_NOTIFICATION_CHANNEL"
             var notificationId = 1589
             notificationId += Random(notificationId).nextInt(1, 30)
@@ -153,14 +163,13 @@ class MainActivity : AppCompatActivity() {
                 }
                 notificationManager.createNotificationChannel(channel)
             }
-            notificationManager.notify(notificationId, notificationBuilder.build())
 
             // Retrieve from firebase
             val firebase = Firebase.database
             val reminderListener = object : ValueEventListener {
                 override fun onDataChange(snapshot: DataSnapshot) {
-                    for (child in snapshot.child("User").children) {
-                        val reminder = child.key?.let { snapshot.child("User").child(it).getValue(
+                    for (child in snapshot.child(LoginActivity.usernameGlobal).children) {
+                        val reminder = child.key?.let { snapshot.child(LoginActivity.usernameGlobal).child(it).getValue(
                             ReminderInfo::class.java) }
 
                         if (reminder?.uid == key) {
@@ -169,7 +178,7 @@ class MainActivity : AppCompatActivity() {
                             reminder.reminder_seen = true
 
                             val database = Firebase.database("https://reminderapp-37bb2-default-rtdb.firebaseio.com")
-                            val reference = database.getReference("User")
+                            val reference = database.getReference(LoginActivity.usernameGlobal)
                             reference.child(key).setValue(reminder)
                         }
                     }
@@ -179,6 +188,20 @@ class MainActivity : AppCompatActivity() {
                     println("Reminder:onCancelled: ${error.details}")
                 }
             }
+
+            if(location_x!=0.0) {
+                println(location_x.toString() + "+" + virtualLatitude.toString())
+                if ((virtualLatitude < location_x + 0.004 &&
+                    virtualLatitude > location_x - 0.004) && (virtualLongitude < location_y + 0.004 &&
+                            virtualLongitude > location_y - 0.004)
+                ) {
+                       notificationManager.notify(notificationId, notificationBuilder.build())
+                }
+            }
+            else if(location_x == 0.0){
+                notificationManager.notify(notificationId, notificationBuilder.build())
+            }
+
             firebase.reference.addValueEventListener(reminderListener)
         }
 
@@ -186,11 +209,15 @@ class MainActivity : AppCompatActivity() {
                 context: Context,
                 key: String,
                 timeInMillis: Long,
-                message: String
+                message: String,
+                location_x: Double,
+                location_y: Double
         ) {
             val reminderParameters = Data.Builder()
                     .putString("message", message)
                     .putString("key", key)
+                    .putDouble("location_x", location_x)
+                    .putDouble("location_y", location_y)
                     .build()
 
             // get minutes from now until reminder

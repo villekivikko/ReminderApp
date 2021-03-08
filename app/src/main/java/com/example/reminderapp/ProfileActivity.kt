@@ -14,6 +14,8 @@ class ProfileActivity : AppCompatActivity() {
         val view = binding.root
         setContentView(view)
 
+        binding.textUsername.text = LoginActivity.usernameGlobal
+
         //Set navigation bar item click listener
         binding.bottomNavigation.setOnNavigationItemSelectedListener {
             when(it.itemId){

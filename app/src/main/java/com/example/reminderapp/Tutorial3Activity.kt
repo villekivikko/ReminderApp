@@ -20,6 +20,7 @@ class Tutorial3Activity : AppCompatActivity() {
         btn.setOnClickListener {
             startActivity(
                     Intent(applicationContext, LoginActivity::class.java))
+            finish()
         }
 
     }

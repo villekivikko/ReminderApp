@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/linear_layout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#599DAE"
+    android:padding="20dp"
+    >
+    <TextView
+        android:id="@+id/txtSure"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Set your virtual location here?"
+        android:textAppearance="@style/Base.TextAppearance.AppCompat.Large"
+        />
+
+    <Button
+        android:id="@+id/btnNo"
+        android:layout_width="80dp"
+        android:layout_height="50dp"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentBottom="true"
+        android:layout_marginEnd="196dp"
+        android:layout_marginRight="196dp"
+        android:layout_marginBottom="587dp"
+        android:text="No"
+        app:backgroundTint="#D83A3A" />
+
+    <Button
+        android:id="@+id/btnYes"
+        android:layout_width="80dp"
+        android:layout_height="50dp"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentLeft="true"
+
+        android:layout_alignParentBottom="true"
+        android:layout_marginStart="182dp"
+        android:layout_marginLeft="182dp"
+        android:layout_marginBottom="589dp"
+        android:text="Yes"
+        app:backgroundTint="#639818" />
+
+</RelativeLayout>

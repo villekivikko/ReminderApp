@@ -30,13 +30,13 @@ class GeofenceReceiver: BroadcastReceiver() {
 
                 // Retrieve from firebase
                 val firebase = Firebase.database
-                val reference = firebase.getReference("User")
+                val reference = firebase.getReference(LoginActivity.usernameGlobal)
                 val reminderListener = object : ValueEventListener {
                     override fun onDataChange(snapshot: DataSnapshot) {
                         val reminder = snapshot.getValue<ReminderInfo>()
                         if (reminder != null){
                             MainActivity.showNotification(context.applicationContext,
-                                message, key)
+                                message, key, reminder.location_x, reminder.location_y)
                         }
                     }
 

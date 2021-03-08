@@ -69,6 +69,7 @@ class AddActivity : AppCompatActivity() , DatePickerDialog.OnDateSetListener,
         locationBtn = binding.btnLocation
         locationBtn.setOnClickListener {
             startActivity(Intent(applicationContext, MapActivity::class.java))
+            finish()
         }
 
         //Initialize voice button and setOnClickListener
@@ -153,13 +154,13 @@ class AddActivity : AppCompatActivity() , DatePickerDialog.OnDateSetListener,
             if (binding.textNameEdit.text.toString() != "") {
 
                 val database = Firebase.database(getString(R.string.firebase_db_url))
-                val reference = database.getReference("User")
+                val reference = database.getReference(LoginActivity.usernameGlobal)
                 val key = reference.push().key
 
                 if (key != null) {
                     val reminder = ReminderInfo(key, binding.textNameEdit.text.toString(), latitude, longitude,
                         binding.textDateEdit.text.toString(),
-                        getCurrentTime(), "User", false)
+                        getCurrentTime(), LoginActivity.usernameGlobal, false)
 
                     //If the reminder has no time or location set
                     if(reminder.reminder_time == "" && reminder.location_x == 0.0){
@@ -170,7 +171,8 @@ class AddActivity : AppCompatActivity() , DatePickerDialog.OnDateSetListener,
                     //Set reminder with WorkManager
                     if(binding.textDateEdit.text.toString() != "") {
                         MainActivity.setReminderWithWorkManager(applicationContext, key,
-                                reminderCalendar.timeInMillis, binding.textNameEdit.text.toString())
+                                reminderCalendar.timeInMillis, binding.textNameEdit.text.toString(),
+                        reminder.location_x, reminder.location_y)
                     }
 
                     //Set Geofence reminder

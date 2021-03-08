@@ -91,7 +91,7 @@ class EditReminderActivity : AppCompatActivity() , DatePickerDialog.OnDateSetLis
                     .putExtra("longitude", location_y)
                     .putExtra("time", time)
             startActivity(intent)
-
+            finish()
         }
 
         //Initialize date and setOnClickListener
@@ -111,7 +111,7 @@ class EditReminderActivity : AppCompatActivity() , DatePickerDialog.OnDateSetLis
         deleteBtn.setOnClickListener {
             //Delete the reminder from database and go back to MainActivity
             val database = Firebase.database(getString(R.string.firebase_db_url))
-            val reference = database.getReference("User")
+            val reference = database.getReference(LoginActivity.usernameGlobal)
             if(key!=null) {
                 reference.child(key).removeValue()
                 //Delete the WorkManager work
@@ -186,15 +186,16 @@ class EditReminderActivity : AppCompatActivity() , DatePickerDialog.OnDateSetLis
             }
 
             val reminder = ReminderInfo(key!!, message!!, location_x, location_y, time!!,
-                    AddActivity.getCurrentTime(), "User", false)
+                    AddActivity.getCurrentTime(), LoginActivity.usernameGlobal, false)
             //Update firebase
             val database = Firebase.database(getString(R.string.firebase_db_url))
-            val reference = database.getReference("User")
+            val reference = database.getReference(LoginActivity.usernameGlobal)
             reference.child(key).setValue(reminder)
 
             //Set reminder with WorkManager. This replaces the old one.
             MainActivity.setReminderWithWorkManager(applicationContext, key,
-                    reminderCalendar.timeInMillis, message!!)
+                    reminderCalendar.timeInMillis, message!!, reminder.location_x,
+            reminder.location_y)
 
             //TODO:  Delete old geofence
             //Set Geofence reminder

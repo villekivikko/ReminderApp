@@ -13,7 +13,8 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.ReminderApp">
-        <activity android:name=".EditLocationActivity"></activity>
+        <activity android:name=".VirtualLocationActivity" />
+        <activity android:name=".EditLocationActivity" />
         <activity android:name=".EditReminderActivity" />
         <activity android:name=".MapActivity" />
 
