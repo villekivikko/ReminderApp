@@ -107,47 +107,9 @@ class AddActivity : AppCompatActivity() , DatePickerDialog.OnDateSetListener,
         addBtn = binding.btnAdd
         addBtn.setOnClickListener {
 
-            val reminderCalendar = GregorianCalendar.getInstance()
-            val dateFormat = "dd.MM.yyyy HH:mm"
-
             // If the reminder has a date and time
             if(binding.textDateEdit.text.toString() != "") {
-                //This can be done with API version 26
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    val formatter = DateTimeFormatter.ofPattern(dateFormat)
-                    val date = LocalDateTime.parse(binding.textDateEdit.text, formatter)
-
-                    reminderCalendar.set(Calendar.YEAR, date.year)
-                    reminderCalendar.set(Calendar.MONTH, date.monthValue - 1)
-                    reminderCalendar.set(Calendar.DAY_OF_MONTH, date.dayOfMonth)
-                    reminderCalendar.set(Calendar.HOUR_OF_DAY, date.hour)
-                    reminderCalendar.set(Calendar.MINUTE, date.minute)
-                }
-                //With lower apis we have to do it manually
-                else {
-                    if (dateFormat.contains(":")) {
-                        //Split date and time to pieces
-                        val dateParts = binding.textDateEdit.text.split(" ")
-                                .toTypedArray()[0].split(".").toTypedArray()
-                        val timeParts = binding.textDateEdit.text.split(" ")
-                                .toTypedArray()[1].split(":").toTypedArray()
-
-                        reminderCalendar.set(Calendar.YEAR, dateParts[2].toInt())
-                        reminderCalendar.set(Calendar.MONTH, dateParts[1].toInt() - 1)
-                        reminderCalendar.set(Calendar.DAY_OF_MONTH, dateParts[0].toInt())
-                        reminderCalendar.set(Calendar.HOUR_OF_DAY, timeParts[0].toInt())
-                        reminderCalendar.set(Calendar.MINUTE, timeParts[1].toInt())
-
-                    } else {
-                        //no time part
-                        //convert date  string value to Date format using dd.mm.yyyy
-                        // here it is assumed that date is in dd.mm.yyyy
-                        val dateParts = binding.textDateEdit.text.split(".").toTypedArray()
-                        reminderCalendar.set(Calendar.YEAR, dateParts[2].toInt())
-                        reminderCalendar.set(Calendar.MONTH, dateParts[1].toInt() - 1)
-                        reminderCalendar.set(Calendar.DAY_OF_MONTH, dateParts[0].toInt())
-                    }
-                }
+                reminderCalendar = getTimeInCalendar(binding.textDateEdit.text.toString())
             }
 
             //Add reminder to Firebase database
@@ -177,7 +139,7 @@ class AddActivity : AppCompatActivity() , DatePickerDialog.OnDateSetListener,
 
                     //Set Geofence reminder
                     if(latitude != 0.0) {
-                        createGeoFence(LatLng(latitude, longitude), key,
+                        createGeoFence(applicationContext, LatLng(latitude, longitude), key,
                                 binding.textNameEdit.text.toString(),  geofencingClient)
                     }
                 }
@@ -233,73 +195,95 @@ class AddActivity : AppCompatActivity() , DatePickerDialog.OnDateSetListener,
         binding.textDateEdit.setText(simpleDateFormat.format(reminderCalendar.time))
     }
 
-    private fun createGeoFence(location: LatLng, key: String, msg: String, geofencingClient: GeofencingClient) {
-        val geofence = Geofence.Builder()
-                .setRequestId(GEOFENCE_ID)
-                .setCircularRegion(location.latitude, location.longitude, GEOFENCE_RADIUS.toFloat())
-                .setExpirationDuration(GEOFENCE_EXPIRATION.toLong())
-                .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER or
-                        Geofence.GEOFENCE_TRANSITION_DWELL)
-                .setLoiteringDelay(GEOFENCE_DWELL_DELAY)
-                .build()
+    companion object{
 
-        val geofenceRequest = GeofencingRequest.Builder()
-                .setInitialTrigger(GeofencingRequest.INITIAL_TRIGGER_ENTER)
-                .addGeofence(geofence)
-                .build()
+        fun createGeoFence(context: Context, location: LatLng, key: String, msg: String, geofencingClient: GeofencingClient) {
+            val geofence = Geofence.Builder()
+                    .setRequestId(key)
+                    .setCircularRegion(location.latitude, location.longitude, GEOFENCE_RADIUS.toFloat())
+                    .setExpirationDuration(GEOFENCE_EXPIRATION.toLong())
+                    .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER or
+                            Geofence.GEOFENCE_TRANSITION_DWELL)
+                    .setLoiteringDelay(GEOFENCE_DWELL_DELAY)
+                    .build()
 
+            val geofenceRequest = GeofencingRequest.Builder()
+                    .setInitialTrigger(GeofencingRequest.INITIAL_TRIGGER_ENTER)
+                    .addGeofence(geofence)
+                    .build()
 
-        val intent = Intent(this, GeofenceReceiver::class.java)
-                .putExtra("key", key)
-                .putExtra("message", "Geofence entered - $msg")
+            val intent = Intent(context, GeofenceReceiver::class.java)
+                    .putExtra("key", key)
+                    .putExtra("message", "Geofence entered - $msg")
 
-        val pendingIntent = PendingIntent.getBroadcast(
-                applicationContext, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT
-        )
+            val pendingIntent = PendingIntent.getBroadcast(
+                    context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT
+            )
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            if (ContextCompat.checkSelfPermission(
-                            applicationContext, Manifest.permission.ACCESS_BACKGROUND_LOCATION
-                    ) != PackageManager.PERMISSION_GRANTED) {
-                ActivityCompat.requestPermissions(
-                        this,
-                        arrayOf(
-                                Manifest.permission.ACCESS_BACKGROUND_LOCATION
-                        ),
-                        GEOFENCE_LOCATION_REQUEST_CODE
-                )
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                if (ContextCompat.checkSelfPermission(
+                                context, Manifest.permission.ACCESS_BACKGROUND_LOCATION
+                        ) != PackageManager.PERMISSION_GRANTED) {
+                    ActivityCompat.requestPermissions(
+                            Activity(),
+                            arrayOf(
+                                    Manifest.permission.ACCESS_BACKGROUND_LOCATION
+                            ),
+                            GEOFENCE_LOCATION_REQUEST_CODE
+                    )
+                } else {
+                    geofencingClient.addGeofences(geofenceRequest, pendingIntent)
+                }
             } else {
                 geofencingClient.addGeofences(geofenceRequest, pendingIntent)
             }
-        } else {
-            geofencingClient.addGeofences(geofenceRequest, pendingIntent)
         }
-    }
-
-    companion object{
 
         fun getCurrentTime(): String{
             val simpleDateFormat = SimpleDateFormat("dd.MM.yyyy HH:mm")
             return simpleDateFormat.format(Date())
         }
 
-        fun removeGeofences(context: Context, triggeringGeofenceList: MutableList<Geofence>) {
-            val geofenceIdList = mutableListOf<String>()
-            for (entry in triggeringGeofenceList) {
-                geofenceIdList.add(entry.requestId)
-            }
-            LocationServices.getGeofencingClient(context).removeGeofences(geofenceIdList)
-        }
+        fun getTimeInCalendar(time: String): Calendar{
+            val reminderCalendar = GregorianCalendar.getInstance()
+            val dateFormat = "dd.MM.yyyy HH:mm"
+            //This can be done with API version 26
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                val formatter = DateTimeFormatter.ofPattern(dateFormat)
+                val date = LocalDateTime.parse(time, formatter)
 
-        fun removeGeofence(context: Context, key: String, triggeringGeofenceList: MutableList<Geofence>) {
-            val geofenceIdList = mutableListOf<String>()
-            for (entry in triggeringGeofenceList) {
-                if(entry.requestId == key) {
-                    geofenceIdList.add(entry.requestId)
+                reminderCalendar.set(Calendar.YEAR, date.year)
+                reminderCalendar.set(Calendar.MONTH, date.monthValue - 1)
+                reminderCalendar.set(Calendar.DAY_OF_MONTH, date.dayOfMonth)
+                reminderCalendar.set(Calendar.HOUR_OF_DAY, date.hour)
+                reminderCalendar.set(Calendar.MINUTE, date.minute)
+            }
+            //With lower apis we have to do it manually
+            else {
+                if (dateFormat.contains(":")) {
+                    //Split date and time to pieces
+                    val dateParts = time.split(" ")
+                            .toTypedArray()[0].split(".").toTypedArray()
+                    val timeParts = time.split(" ")
+                            .toTypedArray()[1].split(":").toTypedArray()
+
+                    reminderCalendar.set(Calendar.YEAR, dateParts[2].toInt())
+                    reminderCalendar.set(Calendar.MONTH, dateParts[1].toInt() - 1)
+                    reminderCalendar.set(Calendar.DAY_OF_MONTH, dateParts[0].toInt())
+                    reminderCalendar.set(Calendar.HOUR_OF_DAY, timeParts[0].toInt())
+                    reminderCalendar.set(Calendar.MINUTE, timeParts[1].toInt())
+
+                } else {
+                    //no time part
+                    //convert date  string value to Date format using dd.mm.yyyy
+                    // here it is assumed that date is in dd.mm.yyyy
+                    val dateParts = time.split(".").toTypedArray()
+                    reminderCalendar.set(Calendar.YEAR, dateParts[2].toInt())
+                    reminderCalendar.set(Calendar.MONTH, dateParts[1].toInt() - 1)
+                    reminderCalendar.set(Calendar.DAY_OF_MONTH, dateParts[0].toInt())
                 }
             }
-            LocationServices.getGeofencingClient(context).removeGeofences(geofenceIdList)
+            return reminderCalendar
         }
     }
-
 }

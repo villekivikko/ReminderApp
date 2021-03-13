@@ -14,6 +14,7 @@ import androidx.work.ExistingWorkPolicy
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import com.example.reminderapp.databinding.ActivityMainBinding
+import com.google.android.gms.location.GeofencingClient
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.ValueEventListener
@@ -26,6 +27,7 @@ import kotlin.random.Random
 class MainActivity : AppCompatActivity() {
     private lateinit var listView: ListView
     private lateinit var binding: ActivityMainBinding
+    private lateinit var geofencingClient: GeofencingClient
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
@@ -49,8 +51,32 @@ class MainActivity : AppCompatActivity() {
                     retrieveFirebase(show)
                 }
                 R.id.ic_logout -> {
+                    //Cancel reminders
+                    // Retrieve from firebase and cancel reminders
+                    val firebase = Firebase.database
+                    val user = LoginActivity.usernameGlobal
+                    val reminderListener = object : ValueEventListener {
+                        override fun onDataChange(snapshot: DataSnapshot) {
+                            for (child in snapshot.child(user).children) {
+                                val reminder = child.getValue(ReminderInfo::class.java)
+                                if (reminder != null) {
+                                    if (reminder.uid != "" && !reminder.reminder_seen) {
+                                        cancelReminder(applicationContext, reminder.uid)
+                                    }
+                                    if(reminder.location_x != 0.0){
+                                        geofencingClient.removeGeofences(mutableListOf(reminder.uid))
+                                    }
+                                }
+                            }
+                        }
+                        override fun onCancelled(error: DatabaseError) {
+                            println("Reminder:onCancelled: ${error.details}")
+                        }
+                    }
+                    firebase.reference.addValueEventListener(reminderListener)
                     LoginActivity.usernameGlobal = ""
                     LoginActivity.passwordMatch = 0
+
                     startActivity(Intent(applicationContext, LoginActivity::class.java))
                     finish()
                 }
@@ -105,16 +131,12 @@ class MainActivity : AppCompatActivity() {
                         if (reminder?.message != null && reminder.reminder_seen) {
                             values.add(reminder)
                             adaptor.notifyDataSetChanged()
-                        } else {
-                            println("FAILED TO RETRIEVE")
                         }
                     }
                     if(show) {
                         if (reminder?.message != null) {
                             values.add(reminder)
                             adaptor.notifyDataSetChanged()
-                        } else {
-                            println("FAILED TO RETRIEVE")
                         }
                     }
                 }
@@ -173,7 +195,6 @@ class MainActivity : AppCompatActivity() {
                             ReminderInfo::class.java) }
 
                         if (reminder?.uid == key) {
-                            println(reminder)
                             //Update firebase
                             reminder.reminder_seen = true
 
@@ -229,12 +250,12 @@ class MainActivity : AppCompatActivity() {
                     .setInputData(reminderParameters)
                     .setInitialDelay(minutesFromNow, TimeUnit.MILLISECONDS)
                     .build()
-            println(reminderRequest)
             WorkManager.getInstance(context).enqueueUniqueWork(key,
                     ExistingWorkPolicy.REPLACE, reminderRequest)
         }
 
         fun cancelReminder(context: Context, key: String){
+            println("Canceled!")
             WorkManager.getInstance(context).cancelUniqueWork(key)
         }
     }

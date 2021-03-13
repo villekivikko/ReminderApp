@@ -143,45 +143,6 @@ class EditLocationActivity : AppCompatActivity(), OnMapReadyCallback {
         }
     }
 
-    private fun createGeoFence(location: LatLng, key: String, msg: String, geofencingClient: GeofencingClient) {
-        val geofence = Geofence.Builder()
-                .setRequestId(GEOFENCE_ID)
-                .setCircularRegion(location.latitude, location.longitude, GEOFENCE_RADIUS.toFloat())
-                .setExpirationDuration(GEOFENCE_EXPIRATION.toLong())
-                .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER or Geofence.GEOFENCE_TRANSITION_DWELL)
-                .setLoiteringDelay(GEOFENCE_DWELL_DELAY)
-                .build()
-
-        val geofenceRequest = GeofencingRequest.Builder()
-                .setInitialTrigger(GeofencingRequest.INITIAL_TRIGGER_ENTER)
-                .addGeofence(geofence)
-                .build()
-
-
-        val intent = Intent(this, GeofenceReceiver::class.java)
-                .putExtra("key", key)
-                .putExtra("message", "Geofence alert - $msg")
-
-        val pendingIntent = PendingIntent.getBroadcast(
-                applicationContext, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT
-        )
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            if (ContextCompat.checkSelfPermission(applicationContext,
-                            Manifest.permission.ACCESS_BACKGROUND_LOCATION
-                    ) != PackageManager.PERMISSION_GRANTED) {
-                ActivityCompat.requestPermissions(this,
-                        arrayOf(Manifest.permission.ACCESS_BACKGROUND_LOCATION),
-                        GEOFENCE_LOCATION_REQUEST_CODE
-                )
-            } else {
-                geofencingClient.addGeofences(geofenceRequest, pendingIntent)
-            }
-        } else {
-            geofencingClient.addGeofences(geofenceRequest, pendingIntent)
-        }
-    }
-
     private fun isLocationPermissionGranted() : Boolean {
         return ContextCompat.checkSelfPermission(
                 this, Manifest.permission.ACCESS_FINE_LOCATION
