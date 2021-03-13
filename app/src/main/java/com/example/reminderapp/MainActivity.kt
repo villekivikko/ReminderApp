@@ -15,6 +15,7 @@ import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import com.example.reminderapp.databinding.ActivityMainBinding
 import com.google.android.gms.location.GeofencingClient
+import com.google.android.gms.location.LocationServices
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.ValueEventListener
@@ -34,6 +35,7 @@ class MainActivity : AppCompatActivity() {
         val view = binding.root
         var show = false
         setContentView(view)
+        geofencingClient = LocationServices.getGeofencingClient(this)
 
         //Set top bar item click listener
         binding.topNavigation.setOnNavigationItemSelectedListener {
